@@ -25,7 +25,7 @@ function App() {
   const [mapZoom, setMapZoom] = useState(3);
 
   useEffect(() => {
-    fetch("https://disease.sh/v3/covid-19/countries")
+    fetch("https://disease.sh/v3/covid-19/all")
       .then((response) => response.json())
       .then((data) => {
         setCountryInfo(data);

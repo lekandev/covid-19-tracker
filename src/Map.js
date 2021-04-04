@@ -4,8 +4,8 @@ import { MapContainer as LeafletMap, TileLayer } from "react-leaflet";
 
 function Map({ center, zoom }) {
     return (
-      <div className="map" center={center} zoom={zoom}>
-        <LeafletMap>
+      <div className="map">
+        <LeafletMap center={center} zoom={zoom}>
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
