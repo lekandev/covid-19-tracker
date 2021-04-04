@@ -21,40 +21,69 @@ const options = {
             },
         },
     },
-}
+    scales: {
+        xAxes: [
+            {
+                type: "time",
+                time: {
+                    format: "MM/DD/YY",
+                    tooltipFormat: "ll",
+                },
+            },
+        ],
+        yAxes: [
+            {
+                gridLines: {
+                    display: false,
+                },
+                ticks: {
+                    // Include a dollar sign in the ticks
+                    callback: function (value, index, values) {
+                        return numeral(value).format("0a");
+                    },
+                },
+            },
+        ],
+    },
+};
 
-function LineGraph() {
-    const [data, setData] = useState({});
+// https://disease.sh/v3/covid-19/historical/all?lastdays=120
 
-    // https://disease.sh/v3/covid-19/historical/all?lastdays=120
+  const buildChartData = (data, casesType = "cases") => {
+    const chartData = [];
+    let lastDataPoint;
+    for (let date in data.cases) {
+      if (lastDataPoint) {
+        const newDataPoint = {
+          x: date,
+          y: data[casesType][date] - lastDataPoint,
+        };
+        chartData.push(newDataPoint);
+      }
+      lastDataPoint = data[casesType][date];
+    }
+    return chartData;
+  };
 
-    const buildChartData = (data, casesType = "cases") => {
-        const chartData = [];
-        let lastDataPoint;
-        for(let date in data.cases) {
-            if (lastDataPoint) {
-                const newDataPoint = {
-                    x: date,
-                    y: data[casesType][date] - lastDataPoint
-                };
-                chartData.push(newDataPoint);
-            }
-            lastDataPoint = data[casesType][date];
-        }
-        return chartData;
+function LineGraph({ casesType = "cases" }) {
+  const [data, setData] = useState({});
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await fetch("https://disease.sh/v3/covid-19/historical/all?lastdays=120")
+        .then((response) => response.json())
+        .then((data) => {
+          let chartData = buildChartData(data, "cases");
+          setData(chartData);
+        });
     };
 
-    useEffect(() => {
-        fetch('https://disease.sh/v3/covid-19/historical/all?lastdays=120')
-        .then(response => response.json())
-        .then((data) => {
-            let chartData = buildChartData(data, 'cases');
-            setData(chartData);
-        });
-    }, []);
+    fetchData();
+  }, [casesType]);
 
-    return (
-      <div>
+  return (
+    <div>
+      {data?.length > 0 && (
         <Line
           options={options}
           data={{
@@ -67,8 +96,9 @@ function LineGraph() {
             ],
           }}
         />
-      </div>
-    );
+      )}
+    </div>
+  );
 }
 
 export default LineGraph
